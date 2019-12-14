@@ -79,14 +79,14 @@
 
 
 
-<meta name="description" content="一个更加快速的TensorDataset使用方法, 60x速度提升!">
+<meta name="description" content="一个更加快速的TensorDataset使用方法, 70x速度提升!">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[BEST PRACTICE] PyTorch TensorDataset">
 <meta property="og:url" content="http:&#x2F;&#x2F;huangbiubiu.github.io&#x2F;2019&#x2F;12&#x2F;13&#x2F;BEST-PRACTICE-PyTorch-TensorDataset&#x2F;index.html">
 <meta property="og:site_name" content="The Standard Book of Spells">
-<meta property="og:description" content="一个更加快速的TensorDataset使用方法, 60x速度提升!">
+<meta property="og:description" content="一个更加快速的TensorDataset使用方法, 70x速度提升!">
 <meta property="article:published_time" content="2019-12-13T14:01:22.000Z">
-<meta property="article:modified_time" content="2019-12-14T03:30:17.730Z">
+<meta property="article:modified_time" content="2019-12-14T04:28:24.301Z">
 <meta property="article:author" content="huangbiubiu">
 <meta property="article:tag" content="PyTorch">
 <meta property="article:tag" content="BEST PRACTICE">
@@ -131,6 +131,15 @@
 
 
 
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '[object Object]', 'auto');
+  ga('send', 'pageview');
+</script>
 
 
 
@@ -292,7 +301,7 @@
       
         <!-- # [BEST PRACTICE] PyTorch TensorDataset -->
 
-<p>一个更加快速的<code>TensorDataset</code>使用方法, 60x速度提升!</p>
+<p>一个更加快速的<code>TensorDataset</code>使用方法, 70x速度提升!</p>
 <a id="more"></a>
 
 <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>PyTorch的<a href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" target="_blank" rel="noopener"><code>Dataset</code></a>类提供了非常好用的数据加载接口。<code>TensorDataset</code>继承了<code>Dataset</code>，提供了已经完全加载到内存中的矩阵的数据读取接口。一个普遍的使用方法是这样的:</p>
@@ -325,7 +334,7 @@
 <blockquote>
 <p>0.5254814000800252</p>
 </blockquote>
-<p>速度提升了<strong>60</strong>倍.</p>
+<p>速度提升了<strong>70</strong>倍.</p>
 <h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>在使用<code>TensorDataset</code>时，应尽量避免直接使用<code>Dataloader</code>，否则<code>Dataloader</code>的auto-batch机制会导致数据加载非常缓慢。一种可行的方法是使用自定义的<code>Sampler</code>控制每次从<code>Dataset</code>中的采样方式，一次直接取出一个batch的数据.</p>
 <h2 id="Further-Reading"><a href="#Further-Reading" class="headerlink" title="Further Reading"></a>Further Reading</h2><ol>
 <li>PyTorch社区的相关讨论 <a href="https://github.com/pytorch/pytorch/issues/4959" target="_blank" rel="noopener">https://github.com/pytorch/pytorch/issues/4959</a></li>
