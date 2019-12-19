@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://huangbiubiu.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="不要让数据加载限制你的训练速度！ 教程：如何避免训练速度被数据加载拖累">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Faster Data Loading in PyTorch">
+<meta property="og:url" content="http:&#x2F;&#x2F;huangbiubiu.github.io&#x2F;2019&#x2F;TUTORIAL-FASTER-DATA-LOADING&#x2F;index.html">
+<meta property="og:site_name" content="The Standard Book of Spells">
+<meta property="og:description" content="不要让数据加载限制你的训练速度！ 教程：如何避免训练速度被数据加载拖累">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-12-19T11:38:57.000Z">
+<meta property="article:modified_time" content="2019-12-19T13:47:47.325Z">
+<meta property="article:author" content="huangbiubiu">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="TUTORIAL">
+<meta property="article:tag" content="As Fast As Possible">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://huangbiubiu.github.io/2019/TUTORIAL-FASTER-DATA-LOADING/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Faster Data Loading in PyTorch | The Standard Book of Spells</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-154556667-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-154556667-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">The Standard Book of Spells</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Wingardium Leviosa!</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>站点地图</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huangbiubiu.github.io/2019/TUTORIAL-FASTER-DATA-LOADING/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+      <meta itemprop="name" content="huangbiubiu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="The Standard Book of Spells">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Faster Data Loading in PyTorch
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2019-12-19 19:38:57 / 修改时间：21:47:47" itemprop="dateCreated datePublished" datetime="2019-12-19T19:38:57+08:00">2019-12-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><em>不要让数据加载限制你的训练速度！</em></p>
+<p>教程：如何避免训练速度被数据加载拖累</p>
+<a id="more"></a>
+
+<p>数据加载是神经网络训练的重要步骤。我们会花费大量金钱来购买更加昂贵的GPU，以求获得更快的训练（推理）速度。然而，数据加载的时间花费却获得较少的关注。如何优化数据加载的过程，从而充分利用GPU？</p>
+<h2 id="是不是：数据加载的时间是你的瓶颈吗？"><a href="#是不是：数据加载的时间是你的瓶颈吗？" class="headerlink" title="是不是：数据加载的时间是你的瓶颈吗？"></a>是不是：数据加载的时间是你的瓶颈吗？</h2><p>「先问是不是」：解决这个问题之前，我们首先需要知道数据加载的时间是否真的拖慢了训练速度。下面介绍几个方法来查看训练中数据加载花费的时间。</p>
+<h3 id="直接测量-time-time"><a href="#直接测量-time-time" class="headerlink" title="直接测量: time.time()"></a>直接测量: <code>time.time()</code></h3><p>最为直观的方法就是测量数据加载所需要的时间花费。Python中可以使用<code>time.time()</code>来返回当前的时间。在数据加载前后分别测量一次当前时间，相减后即为数据加载时间。PyTorch提供了一个很好的<a href="https://github.com/pytorch/examples/blob/master/imagenet/main.py#L277-L280" target="_blank" rel="noopener">示例</a>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># only code snippet</span></span><br><span class="line"><span class="comment"># could not run directly</span></span><br><span class="line"></span><br><span class="line">end = time.time()</span><br><span class="line"><span class="keyword">for</span> i, (images, target) <span class="keyword">in</span> enumerate(train_loader):</span><br><span class="line">    <span class="comment"># measure data loading time</span></span><br><span class="line">    data_time.update(time.time() - end)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在Python中，更加精确地测量代码运行时间的方法是<code>timeit.timeit()</code>。<code>timeit</code>允许你选择不同的时间函数（例如<a href="https://docs.python.org/3.7/library/time.html#time.process_time" target="_blank" rel="noopener"><code>time.process_time()</code></a>来测量<em>CPU时间</em>而不是<em>当前时间</em>），以及重复多次运行来消除测量误差等，详见StackOverflow的<a href="https://stackoverflow.com/questions/17579357/time-time-vs-timeit-timeit" target="_blank" rel="noopener">相关讨论</a>. 而对于本任务，我相信<code>time.time()</code>的精确度是足够的，而且只需要对代码做微小的改动即可。有关使用<code>timeit.timeit()</code>测量代码速度的例子，可以参考<a href="https://docs.python.org/3.7/library/timeit.html#basic-examples" target="_blank" rel="noopener">文档</a>以及<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/#%E4%BB%A3%E7%A0%811-%E8%AF%84%E4%BC%B0%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E9%80%9F%E5%BA%A6">这篇博客</a>。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意</strong> 此方法应当运行多次后，以测量结果稳定后的数值为准。</p>
+</blockquote>
+<h3 id="使用Profile工具-cProfile"><a href="#使用Profile工具-cProfile" class="headerlink" title="使用Profile工具: cProfile"></a>使用Profile工具: cProfile</h3><p><a href="https://docs.python.org/3.7/library/profile.html" target="_blank" rel="noopener">cProfile</a>是Python提供的一个分析器，可以测量出不同函数被调用的次数，时间等信息。</p>
+<p>这是一个数据加载时间缓慢的代码片段（来自于<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/">这篇文章</a>）:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> timeit</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> TensorDataset, DataLoader</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">prepare_data</span><span class="params">()</span> -&gt; DataLoader:</span></span><br><span class="line">    batch_size = <span class="number">8192</span></span><br><span class="line"></span><br><span class="line">    data_all = np.random.rand(batch_size * <span class="number">100</span>, <span class="number">128</span>)  <span class="comment"># demo input</span></span><br><span class="line">    dataset = TensorDataset(torch.from_numpy(data_all))</span><br><span class="line">    data_loader = DataLoader(dataset=dataset,</span><br><span class="line">                             shuffle=<span class="literal">True</span>,</span><br><span class="line">                             batch_size=<span class="number">8192</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> data_loader</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">iterate_data</span><span class="params">(dataloader)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(dataloader):</span><br><span class="line">        <span class="comment"># training</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">dataloader = prepare_data()</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    print(timeit.timeit(<span class="string">'iterate_data(dataloader)'</span>, globals=globals(), number=<span class="number">5</span>))</span><br></pre></td></tr></table></figure>
+
+<p>将这段代码保存为<code>test.py</code>文件，执行命令:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m cProfile -s time test.py</span><br></pre></td></tr></table></figure>
+
+<p>程序运行结束后得到如下结果（截取部分）:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">44.836229782085866</span><br><span class="line">         20666773 function calls (20660872 primitive calls) in 50.746 seconds</span><br><span class="line"></span><br><span class="line">   Ordered by: internal time</span><br><span class="line"></span><br><span class="line">   ncalls  tottime  percall  cumtime  percall filename:lineno(function)</span><br><span class="line">  8192000   20.637    0.000   20.637    0.000 dataset.py:162(&lt;genexpr&gt;)</span><br><span class="line">  4096000    8.601    0.000   29.238    0.000 dataset.py:161(__getitem__)</span><br><span class="line">      500    8.044    0.016    8.044    0.016 &#123;built-in method stack&#125;</span><br><span class="line">      500    3.585    0.007   32.823    0.066 fetch.py:44(&lt;listcomp&gt;)</span><br><span class="line">    43&#x2F;41    2.715    0.063    2.721    0.066 &#123;built-in method _imp.create_dynamic&#125;</span><br><span class="line">      505    1.417    0.003    2.467    0.005 sampler.py:198(__iter__)</span><br><span class="line">        1    1.303    1.303    1.303    1.303 &#123;method &#39;rand&#39; of &#39;numpy.random.mtrand.RandomState&#39; objects&#125;</span><br><span class="line">      505    0.847    0.002   44.629    0.088 dataloader.py:344(__next__)</span><br><span class="line">      404    0.844    0.002    0.844    0.002 &#123;method &#39;read&#39; of &#39;_io.FileIO&#39; objects&#125;</span><br><span class="line">4101414&#x2F;4101115    0.354    0.000    0.354    0.000 &#123;built-in method builtins.len&#125;</span><br><span class="line">        1    0.328    0.328    0.328    0.328 &#123;built-in method mkl._py_mkl_service.get_version&#125;</span><br><span class="line">  4101636    0.317    0.000    0.317    0.000 &#123;method &#39;append&#39; of &#39;list&#39; objects&#125;</span><br><span class="line"> 1000&#x2F;500    0.234    0.000    8.347    0.017 collate.py:42(default_collate)</span><br><span class="line">        5    0.202    0.040    0.202    0.040 &#123;method &#39;tolist&#39; of &#39;torch._C._TensorBase&#39; objects&#125;</span><br><span class="line">      404    0.184    0.000    1.028    0.003 &lt;frozen importlib._bootstrap_external&gt;:914(get_data)</span><br><span class="line">        5    0.178    0.036    0.178    0.036 &#123;built-in method randperm&#125;</span><br><span class="line">      500    0.143    0.000   41.313    0.083 fetch.py:42(fetch)</span><br><span class="line">        5    0.139    0.028   44.830    8.966 test.py:20(iterate_data)</span><br><span class="line">        1    0.092    0.092    0.092    0.092 &#123;built-in method from_numpy&#125;</span><br><span class="line">      500    0.058    0.000    8.108    0.016 collate.py:79(&lt;listcomp&gt;)</span><br><span class="line">      404    0.051    0.000    0.051    0.000 &#123;built-in method marshal.loads&#125;</span><br><span class="line">        5    0.038    0.008    0.038    0.008 &#123;method &#39;random_&#39; of &#39;torch._C._TensorBase&#39; objects&#125;</span><br><span class="line">        9    0.035    0.004    0.035    0.004 &#123;method &#39;readline&#39; of &#39;_io.BufferedReader&#39; objects&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到每个函数被调用的时间和次数。从这个结果我们可以看到，在100次迭代中，<a href="https://pytorch.org/tutorials/beginner/data_loading_tutorial.html#dataset-class" target="_blank" rel="noopener"><code>__getitem__</code></a>函数被调用了4096000次，花费时间29.238s。</p>
+<h3 id="间接观察：nvidia-smi"><a href="#间接观察：nvidia-smi" class="headerlink" title="间接观察：nvidia-smi"></a>间接观察：nvidia-smi</h3><p>我们也可以通过不断观察<code>nvidia-smi</code>的GPU利用率字段来推断GPU是否处于满负荷状态：</p>
+<p><code>watch -n0 nvidia-smi</code></p>
+<p><a href="https://en.wikipedia.org/wiki/Watch_(Unix)" target="_blank" rel="noopener">该命令</a>每0.1s刷新一次<code>nvidia-smi</code>的状态。如果发现<code>Volatile GPU-Util</code>字段不是一直处于100%，有几种可能：</p>
+<ol>
+<li>程序对于GPU太弱了，GPU不需要满负荷运转就可以轻松应付你的程序；</li>
+<li>这个字段不能准确反映GPU利用率，请参考<a href="https://stackoverflow.com/a/40938696/5634636" target="_blank" rel="noopener">这里的讨论</a>；</li>
+<li>数据加载等操作阻塞了GPU的运算。</li>
+</ol>
+<p>第三种情况才是我们需要关注的情况。这种情况下，GPU利用率会呈现“过山车”式的曲线，一会达到100%（GPU运算，模型推理过程），一会非常低（被数据加载代码阻塞）。</p>
+<h2 id="为什么：什么操作会拖慢数据加载？"><a href="#为什么：什么操作会拖慢数据加载？" class="headerlink" title="为什么：什么操作会拖慢数据加载？"></a>为什么：什么操作会拖慢数据加载？</h2><h3 id="数据增强和预处理"><a href="#数据增强和预处理" class="headerlink" title="数据增强和预处理"></a>数据增强和预处理</h3><p>普通的数据增强(例如<a href="https://pytorch.org/docs/stable/torchvision/transforms.html" target="_blank" rel="noopener"><code>torchvision.transforms</code></a>中的transformer)通常比较快。如果你使用了额外的数据增强和预处理方法，请着重关注他们的执行效率。这样的速度减缓通常可以在上文提到的<code>cProfile</code>的结果中反映出来。</p>
+<h3 id="IO"><a href="#IO" class="headerlink" title="IO"></a>IO</h3><p>IO通常包括磁盘IO和网络IO。深度学习的训练中，通常不会涉及大量的网络吞吐。多数情况下，可能导致的网络IO瓶颈是分布式训练的过程中。</p>
+<h4 id="磁盘IO"><a href="#磁盘IO" class="headerlink" title="磁盘IO"></a>磁盘IO</h4><p>磁盘IO瓶颈常见于在大数据集和高性能显卡的环境下。这样的情况下，GPU运算速度非常快，而数据集很大，导致数据加载的速度跟不上数据运算的速度。</p>
+<p>如何判断你的程序遇到了磁盘IO的瓶颈？一种方法是检查系统的<code>iowait</code>。<code>iowait</code>表示CPU等待磁盘的时间，有关具体的含义，请参考<a href="https://serverfault.com/questions/12679/can-anyone-explain-precisely-what-iowait-is" target="_blank" rel="noopener">这里的讨论</a>. </p>
+<p>可以通过命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iostat -x 1</span><br></pre></td></tr></table></figure>
+
+<p>观察每个磁盘的IO情况以及总的CPU iowait:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">avg-cpu:  %user   %nice %system %iowait  %steal   %idle</span><br><span class="line">           0.12    0.00    0.21    0.04    0.00   99.62</span><br><span class="line"></span><br><span class="line">Device:         rrqm&#x2F;s   wrqm&#x2F;s     r&#x2F;s     w&#x2F;s    rkB&#x2F;s    wkB&#x2F;s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util</span><br><span class="line">loop0             0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">dm-0              0.00     0.00    0.00    1.00     0.00     4.00     8.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">dm-1              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>iostat没有在Ubuntu系统上预先安装。对于Ubuntu系统，请预先安装此程序：<code>sudo apt-get install sysstat</code></p>
+</blockquote>
+<p>一般来说，如果<code>iowait</code>长期保持100%，就是磁盘瓶颈的警告。也可以通过观察<code>avgqu-sz</code>字段判断IO队列长度。</p>
+<h4 id="分布式训练"><a href="#分布式训练" class="headerlink" title="分布式训练"></a>分布式训练</h4><p>分布式训练有可能会出现网络IO的瓶颈。Linux有大量监控网络流量的方法，例如<a href="https://github.com/raboof/nethogs" target="_blank" rel="noopener"><code>nethogs</code></a>，以及这里的讨论<a href="https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。" target="_blank" rel="noopener">https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。</a></p>
+<p>一般来说，在分布式训练时，如果网络流量长期处于顶点（例如千兆网络一直被占满），那么就有理由猜测可能是网络限制了分布式训练的过程，包括数据和模型参数的传输过程。此情况可能在大数据集和大模型训练的时候发生。</p>
+<h3 id="PyTorch的一些坑"><a href="#PyTorch的一些坑" class="headerlink" title="PyTorch的一些坑"></a>PyTorch的一些坑</h3><p>例如，PyTorch的<code>TensorDataset</code>配合<code>DataLoader</code>使用可能会发生数据加载过慢的情况，分析及解决方案请参考<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/">这篇博文</a>.</p>
+<h2 id="怎么做：如何提高数据加载的速度"><a href="#怎么做：如何提高数据加载的速度" class="headerlink" title="怎么做：如何提高数据加载的速度"></a>怎么做：如何提高数据加载的速度</h2><p>面对不同的原因，列出不同的解决方法如下。</p>
+<h3 id="数据增强和预处理-1"><a href="#数据增强和预处理-1" class="headerlink" title="数据增强和预处理"></a>数据增强和预处理</h3><ol>
+<li>考虑提高运行效率，包括但不限于使用多进程(线程)处理等</li>
+<li>考虑将数据增强和预处理操作离线进行，即预先处理好数据存在磁盘中，在训练时直接加载处理好的数据。</li>
+</ol>
+<h3 id="IO-1"><a href="#IO-1" class="headerlink" title="IO"></a>IO</h3><h4 id="磁盘IO-1"><a href="#磁盘IO-1" class="headerlink" title="磁盘IO"></a>磁盘IO</h4><ol>
+<li>将数据存储在SSD中通常能解决此问题</li>
+<li>如果内存足够大，考虑将所有数据加载到内存中（通常不太可行）</li>
+</ol>
+<h4 id="分布式训练-1"><a href="#分布式训练-1" class="headerlink" title="分布式训练"></a>分布式训练</h4><ol>
+<li>升级为高速网络连接，如万兆网络、<a href="https://zh.wikipedia.org/wiki/InfiniBand" target="_blank" rel="noopener">InfiniBand</a></li>
+<li>使用单机训练</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+              <a href="/tags/TUTORIAL/" rel="tag"># TUTORIAL</a>
+              <a href="/tags/As-Fast-As-Possible/" rel="tag"># As Fast As Possible</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/BEST-PRACTICE-PyTorch-TensorDataset/" rel="prev" title="Faster PyTorch TensorDataset">
+      <i class="fa fa-chevron-left"></i> Faster PyTorch TensorDataset
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#是不是：数据加载的时间是你的瓶颈吗？"><span class="nav-number">1.</span> <span class="nav-text">是不是：数据加载的时间是你的瓶颈吗？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#直接测量-time-time"><span class="nav-number">1.1.</span> <span class="nav-text">直接测量: time.time()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Profile工具-cProfile"><span class="nav-number">1.2.</span> <span class="nav-text">使用Profile工具: cProfile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#间接观察：nvidia-smi"><span class="nav-number">1.3.</span> <span class="nav-text">间接观察：nvidia-smi</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么：什么操作会拖慢数据加载？"><span class="nav-number">2.</span> <span class="nav-text">为什么：什么操作会拖慢数据加载？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据增强和预处理"><span class="nav-number">2.1.</span> <span class="nav-text">数据增强和预处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IO"><span class="nav-number">2.2.</span> <span class="nav-text">IO</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#磁盘IO"><span class="nav-number">2.2.1.</span> <span class="nav-text">磁盘IO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分布式训练"><span class="nav-number">2.2.2.</span> <span class="nav-text">分布式训练</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PyTorch的一些坑"><span class="nav-number">2.3.</span> <span class="nav-text">PyTorch的一些坑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#怎么做：如何提高数据加载的速度"><span class="nav-number">3.</span> <span class="nav-text">怎么做：如何提高数据加载的速度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据增强和预处理-1"><span class="nav-number">3.1.</span> <span class="nav-text">数据增强和预处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IO-1"><span class="nav-number">3.2.</span> <span class="nav-text">IO</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#磁盘IO-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">磁盘IO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分布式训练-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">分布式训练</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="huangbiubiu"
+      src="/uploads/avatar.jpg">
+  <p class="site-author-name" itemprop="name">huangbiubiu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/huangbiubiu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;huangbiubiu" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:hyhlryf@gmail.com" title="E-Mail → mailto:hyhlryf@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/5634636/huangbiubiu" title="StackOverflow → https:&#x2F;&#x2F;stackoverflow.com&#x2F;users&#x2F;5634636&#x2F;huangbiubiu" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">huangbiubiu</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.1.1
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
