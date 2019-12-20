@@ -51,10 +51,10 @@
 <blockquote>
 <p>iostat没有在Ubuntu系统上预先安装。对于Ubuntu系统，请预先安装此程序：<code>sudo apt-get install sysstat</code></p>
 </blockquote>
-<p>一般来说，如果<code>iowait</code>长期保持100%，就是磁盘瓶颈的警告。也可以通过观察<code>avgqu-sz</code>字段判断IO队列长度。</p>
+<p>一般来说，如果<code>iowait</code>长期保持100%，就是磁盘瓶颈的警告。也可以通过观察<code>avgqu-sz</code>字段判断IO队列长度。[<code>iostat</code>]命令的其他字段的含义请参考<a href="https://linux.die.net/man/1/iostat" target="_blank" rel="noopener">文档</a>或<a href="https://blog.serverfault.com/2010/07/06/777852755/" target="_blank" rel="noopener">这篇博客</a>.</p>
 <h4 id="分布式训练"><a href="#分布式训练" class="headerlink" title="分布式训练"></a>分布式训练</h4><p>分布式训练有可能会出现网络IO的瓶颈。Linux有大量监控网络流量的方法，例如<a href="https://github.com/raboof/nethogs" target="_blank" rel="noopener"><code>nethogs</code></a>，以及这里的讨论<a href="https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。" target="_blank" rel="noopener">https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。</a></p>
 <p>一般来说，在分布式训练时，如果网络流量长期处于顶点（例如千兆网络一直被占满），那么就有理由猜测可能是网络限制了分布式训练的过程，包括数据和模型参数的传输过程。此情况可能在大数据集和大模型训练的时候发生。</p>
-<h3 id="PyTorch的一些坑"><a href="#PyTorch的一些坑" class="headerlink" title="PyTorch的一些坑"></a>PyTorch的一些坑</h3><p>例如，PyTorch的<code>TensorDataset</code>配合<code>DataLoader</code>使用可能会发生数据加载过慢的情况，分析及解决方案请参考<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/">这篇博文</a>.</p>
+<h3 id="特殊数据类型的加载方式"><a href="#特殊数据类型的加载方式" class="headerlink" title="特殊数据类型的加载方式"></a>特殊数据类型的加载方式</h3><h4 id="Tensor-or-numpy-array"><a href="#Tensor-or-numpy-array" class="headerlink" title="Tensor (or numpy array)"></a>Tensor (or numpy array)</h4><p>在一些情况下，整个数据集都被以<a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html" target="_blank" rel="noopener"><code>numpy.ndarray</code></a>的形式保存在内存中，在不同的step中从numpy数组中<a href="https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html" target="_blank" rel="noopener">索引</a>出不同的数据子集训练。PyTorch提供了<code>TensorDataset</code>来做到这一点。然而，PyTorch的<code>TensorDataset</code>配合<code>DataLoader</code>使用可能会发生数据加载过慢的情况，分析及解决方案请参考<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/">这篇博文</a>.</p>
 <h2 id="怎么做：如何提高数据加载的速度"><a href="#怎么做：如何提高数据加载的速度" class="headerlink" title="怎么做：如何提高数据加载的速度"></a>怎么做：如何提高数据加载的速度</h2><p>面对不同的原因，列出不同的解决方法如下。</p>
 <h3 id="数据增强和预处理-1"><a href="#数据增强和预处理-1" class="headerlink" title="数据增强和预处理"></a>数据增强和预处理</h3><ol>
 <li>考虑提高运行效率，包括但不限于使用多进程(线程)处理等</li>
@@ -71,8 +71,8 @@
 ]]></content>
       <tags>
         <tag>PyTorch</tag>
-        <tag>As Fast As Possible</tag>
         <tag>TUTORIAL</tag>
+        <tag>As Fast As Possible</tag>
       </tags>
   </entry>
   <entry>
@@ -128,8 +128,8 @@
 ]]></content>
       <tags>
         <tag>PyTorch</tag>
-        <tag>BEST PRACTICE</tag>
         <tag>As Fast As Possible</tag>
+        <tag>BEST PRACTICE</tag>
       </tags>
   </entry>
 </search>
