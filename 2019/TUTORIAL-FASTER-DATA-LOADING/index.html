@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="mcRjlBY6DK">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -19,7 +20,7 @@
 <script id="hexo-configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    hostname: new URL('http://huangbiubiu.github.io').hostname,
+    hostname: new URL('https://huangbiubiu.com').hostname,
     root: '/',
     scheme: 'Muse',
     version: '7.6.0',
@@ -49,7 +50,7 @@
   <meta name="description" content="不要让数据加载限制你的训练速度！ 教程：如何避免训练速度被数据加载拖累">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Faster Data Loading in PyTorch">
-<meta property="og:url" content="http:&#x2F;&#x2F;huangbiubiu.github.io&#x2F;2019&#x2F;TUTORIAL-FASTER-DATA-LOADING&#x2F;index.html">
+<meta property="og:url" content="https:&#x2F;&#x2F;huangbiubiu.com&#x2F;2019&#x2F;TUTORIAL-FASTER-DATA-LOADING&#x2F;index.html">
 <meta property="og:site_name" content="The Standard Book of Spells">
 <meta property="og:description" content="不要让数据加载限制你的训练速度！ 教程：如何避免训练速度被数据加载拖累">
 <meta property="og:locale" content="zh_CN">
@@ -61,7 +62,7 @@
 <meta property="article:tag" content="As Fast As Possible">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://huangbiubiu.github.io/2019/TUTORIAL-FASTER-DATA-LOADING/">
+<link rel="canonical" href="https://huangbiubiu.com/2019/TUTORIAL-FASTER-DATA-LOADING/">
 
 
 <script id="page-configurations">
@@ -213,7 +214,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huangbiubiu.github.io/2019/TUTORIAL-FASTER-DATA-LOADING/">
+    <link itemprop="mainEntityOfPage" href="https://huangbiubiu.com/2019/TUTORIAL-FASTER-DATA-LOADING/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/uploads/avatar.jpg">
@@ -267,13 +268,13 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># only code snippet</span></span><br><span class="line"><span class="comment"># could not run directly</span></span><br><span class="line"></span><br><span class="line">end = time.time()</span><br><span class="line"><span class="keyword">for</span> i, (images, target) <span class="keyword">in</span> enumerate(train_loader):</span><br><span class="line">    <span class="comment"># measure data loading time</span></span><br><span class="line">    data_time.update(time.time() - end)</span><br></pre></td></tr></table></figure>
 
 <blockquote>
-<p>在Python中，更加精确地测量代码运行时间的方法是<code>timeit.timeit()</code>。<code>timeit</code>允许你选择不同的时间函数（例如<a href="https://docs.python.org/3.7/library/time.html#time.process_time" target="_blank" rel="noopener"><code>time.process_time()</code></a>来测量<em>CPU时间</em>而不是<em>当前时间</em>），以及重复多次运行来消除测量误差等，详见StackOverflow的<a href="https://stackoverflow.com/questions/17579357/time-time-vs-timeit-timeit" target="_blank" rel="noopener">相关讨论</a>. 而对于本任务，我相信<code>time.time()</code>的精确度是足够的，而且只需要对代码做微小的改动即可。有关使用<code>timeit.timeit()</code>测量代码速度的例子，可以参考<a href="https://docs.python.org/3.7/library/timeit.html#basic-examples" target="_blank" rel="noopener">文档</a>以及<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/#%E4%BB%A3%E7%A0%811-%E8%AF%84%E4%BC%B0%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E9%80%9F%E5%BA%A6">这篇博客</a>。</p>
+<p>在Python中，更加精确地测量代码运行时间的方法是<code>timeit.timeit()</code>。<code>timeit</code>允许你选择不同的时间函数（例如<a href="https://docs.python.org/3.7/library/time.html#time.process_time" target="_blank" rel="noopener"><code>time.process_time()</code></a>来测量<em>CPU时间</em>而不是<em>当前时间</em>），以及重复多次运行来消除测量误差等，详见StackOverflow的<a href="https://stackoverflow.com/questions/17579357/time-time-vs-timeit-timeit" target="_blank" rel="noopener">相关讨论</a>. 而对于本任务，我相信<code>time.time()</code>的精确度是足够的，而且只需要对代码做微小的改动即可。有关使用<code>timeit.timeit()</code>测量代码速度的例子，可以参考<a href="https://docs.python.org/3.7/library/timeit.html#basic-examples" target="_blank" rel="noopener">文档</a>以及<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/#%E4%BB%A3%E7%A0%811-%E8%AF%84%E4%BC%B0%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E9%80%9F%E5%BA%A6" target="_blank" rel="noopener">这篇博客</a>。</p>
 </blockquote>
 <blockquote>
 <p><strong>注意</strong> 此方法应当运行多次后，以测量结果稳定后的数值为准。</p>
 </blockquote>
 <h3 id="使用Profile工具-cProfile"><a href="#使用Profile工具-cProfile" class="headerlink" title="使用Profile工具: cProfile"></a>使用Profile工具: cProfile</h3><p><a href="https://docs.python.org/3.7/library/profile.html" target="_blank" rel="noopener">cProfile</a>是Python提供的一个分析器，可以测量出不同函数被调用的次数，时间等信息。</p>
-<p>这是一个数据加载时间缓慢的代码片段（来自于<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/">这篇文章</a>）:</p>
+<p>这是一个数据加载时间缓慢的代码片段（来自于<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/" target="_blank" rel="noopener">这篇文章</a>）:</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> timeit</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> TensorDataset, DataLoader</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">prepare_data</span><span class="params">()</span> -&gt; DataLoader:</span></span><br><span class="line">    batch_size = <span class="number">8192</span></span><br><span class="line"></span><br><span class="line">    data_all = np.random.rand(batch_size * <span class="number">100</span>, <span class="number">128</span>)  <span class="comment"># demo input</span></span><br><span class="line">    dataset = TensorDataset(torch.from_numpy(data_all))</span><br><span class="line">    data_loader = DataLoader(dataset=dataset,</span><br><span class="line">                             shuffle=<span class="literal">True</span>,</span><br><span class="line">                             batch_size=<span class="number">8192</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> data_loader</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">iterate_data</span><span class="params">(dataloader)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(dataloader):</span><br><span class="line">        <span class="comment"># training</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">dataloader = prepare_data()</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    print(timeit.timeit(<span class="string">'iterate_data(dataloader)'</span>, globals=globals(), number=<span class="number">5</span>))</span><br></pre></td></tr></table></figure>
 
 <p>将这段代码保存为<code>test.py</code>文件，执行命令:</p>
@@ -308,7 +309,7 @@
 <p>一般来说，如果<code>iowait</code>长期保持100%，就是磁盘瓶颈的警告。也可以通过观察<code>avgqu-sz</code>字段判断IO队列长度。[<code>iostat</code>]命令的其他字段的含义请参考<a href="https://linux.die.net/man/1/iostat" target="_blank" rel="noopener">文档</a>或<a href="https://blog.serverfault.com/2010/07/06/777852755/" target="_blank" rel="noopener">这篇博客</a>.</p>
 <h4 id="分布式训练"><a href="#分布式训练" class="headerlink" title="分布式训练"></a>分布式训练</h4><p>分布式训练有可能会出现网络IO的瓶颈。Linux有大量监控网络流量的方法，例如<a href="https://github.com/raboof/nethogs" target="_blank" rel="noopener"><code>nethogs</code></a>，以及这里的讨论<a href="https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。" target="_blank" rel="noopener">https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。</a></p>
 <p>一般来说，在分布式训练时，如果网络流量长期处于顶点（例如千兆网络一直被占满），那么就有理由猜测可能是网络限制了分布式训练的过程，包括数据和模型参数的传输过程。此情况可能在大数据集和大模型训练的时候发生。</p>
-<h3 id="特殊数据类型的加载方式"><a href="#特殊数据类型的加载方式" class="headerlink" title="特殊数据类型的加载方式"></a>特殊数据类型的加载方式</h3><h4 id="Tensor-or-numpy-array"><a href="#Tensor-or-numpy-array" class="headerlink" title="Tensor (or numpy array)"></a>Tensor (or numpy array)</h4><p>在一些情况下，整个数据集都被以<a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html" target="_blank" rel="noopener"><code>numpy.ndarray</code></a>的形式保存在内存中，在不同的step中从numpy数组中<a href="https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html" target="_blank" rel="noopener">索引</a>出不同的数据子集训练。PyTorch提供了<code>TensorDataset</code>来做到这一点。然而，PyTorch的<code>TensorDataset</code>配合<code>DataLoader</code>使用可能会发生数据加载过慢的情况，分析及解决方案请参考<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/">这篇博文</a>.</p>
+<h3 id="特殊数据类型的加载方式"><a href="#特殊数据类型的加载方式" class="headerlink" title="特殊数据类型的加载方式"></a>特殊数据类型的加载方式</h3><h4 id="Tensor-or-numpy-array"><a href="#Tensor-or-numpy-array" class="headerlink" title="Tensor (or numpy array)"></a>Tensor (or numpy array)</h4><p>在一些情况下，整个数据集都被以<a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html" target="_blank" rel="noopener"><code>numpy.ndarray</code></a>的形式保存在内存中，在不同的step中从numpy数组中<a href="https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html" target="_blank" rel="noopener">索引</a>出不同的数据子集训练。PyTorch提供了<code>TensorDataset</code>来做到这一点。然而，PyTorch的<code>TensorDataset</code>配合<code>DataLoader</code>使用可能会发生数据加载过慢的情况，分析及解决方案请参考<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/" target="_blank" rel="noopener">这篇博文</a>.</p>
 <h2 id="怎么做：如何提高数据加载的速度"><a href="#怎么做：如何提高数据加载的速度" class="headerlink" title="怎么做：如何提高数据加载的速度"></a>怎么做：如何提高数据加载的速度</h2><p>面对不同的原因，列出不同的解决方法如下。</p>
 <h3 id="数据增强和预处理-1"><a href="#数据增强和预处理-1" class="headerlink" title="数据增强和预处理"></a>数据增强和预处理</h3><ol>
 <li>考虑提高运行效率，包括但不限于使用多进程(线程)处理等</li>
