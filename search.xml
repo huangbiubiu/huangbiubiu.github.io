@@ -54,7 +54,8 @@
 <p>一般来说，如果<code>iowait</code>长期保持100%，就是磁盘瓶颈的警告。也可以通过观察<code>avgqu-sz</code>字段判断IO队列长度。[<code>iostat</code>]命令的其他字段的含义请参考<a href="https://linux.die.net/man/1/iostat" target="_blank" rel="noopener">文档</a>或<a href="https://blog.serverfault.com/2010/07/06/777852755/" target="_blank" rel="noopener">这篇博客</a>.</p>
 <h4 id="分布式训练"><a href="#分布式训练" class="headerlink" title="分布式训练"></a>分布式训练</h4><p>分布式训练有可能会出现网络IO的瓶颈。Linux有大量监控网络流量的方法，例如<a href="https://github.com/raboof/nethogs" target="_blank" rel="noopener"><code>nethogs</code></a>，以及这里的讨论<a href="https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。" target="_blank" rel="noopener">https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal。</a></p>
 <p>一般来说，在分布式训练时，如果网络流量长期处于顶点（例如千兆网络一直被占满），那么就有理由猜测可能是网络限制了分布式训练的过程，包括数据和模型参数的传输过程。此情况可能在大数据集和大模型训练的时候发生。</p>
-<h3 id="特殊数据类型的加载方式"><a href="#特殊数据类型的加载方式" class="headerlink" title="特殊数据类型的加载方式"></a>特殊数据类型的加载方式</h3><h4 id="Tensor-or-numpy-array"><a href="#Tensor-or-numpy-array" class="headerlink" title="Tensor (or numpy array)"></a>Tensor (or numpy array)</h4><p>在一些情况下，整个数据集都被以<a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html" target="_blank" rel="noopener"><code>numpy.ndarray</code></a>的形式保存在内存中，在不同的step中从numpy数组中<a href="https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html" target="_blank" rel="noopener">索引</a>出不同的数据子集训练。PyTorch提供了<code>TensorDataset</code>来做到这一点。然而，PyTorch的<code>TensorDataset</code>配合<code>DataLoader</code>使用可能会发生数据加载过慢的情况，分析及解决方案请参考<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/" target="_blank" rel="noopener">这篇博文</a>.</p>
+<h3 id="特殊数据类型的加载方式"><a href="#特殊数据类型的加载方式" class="headerlink" title="特殊数据类型的加载方式"></a>特殊数据类型的加载方式</h3><h4 id="Tensor-or-numpy-array"><a href="#Tensor-or-numpy-array" class="headerlink" title="Tensor (or numpy array)"></a>Tensor (or numpy array)</h4><p>在一些情况下，整个数据集都被以<a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html" target="_blank" rel="noopener"><code>numpy.ndarray</code></a>的形式保存在内存中，在不同的step中从numpy数组中<a href="https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html" target="_blank" rel="noopener">索引</a>出不同的数据子集训练。PyTorch提供了<code>TensorDataset</code>来做到这一点。理论上，直接从内存中读取数据不应当有时间瓶颈。然而，PyTorch的<code>TensorDataset</code>配合<code>DataLoader</code>使用可能会发生数据加载过慢的情况。分析及解决方案请参考<a href="https://huangbiubiu.github.io/2019/BEST-PRACTICE-PyTorch-TensorDataset/" target="_blank" rel="noopener">这篇博文</a>.</p>
+<h4 id="CSV-文件"><a href="#CSV-文件" class="headerlink" title="CSV 文件"></a>CSV 文件</h4><p>大量结构化数据集以csv的格式提供。然而，对于SGD这类批优化算法，csv的速度是缓慢的。原因在于，不同于固定长度的数据类型（相同大小的图片，数组等），csv通过换行符<code>\n</code>来确定两行之间的分界点。<a href="https://en.wikipedia.org/wiki/Random_access" target="_blank" rel="noopener">随机读取</a>一个csv文件的某一行的时间开销是$O(n)$ (数组是$O(1)$). </p>
 <h2 id="怎么做：如何提高数据加载的速度"><a href="#怎么做：如何提高数据加载的速度" class="headerlink" title="怎么做：如何提高数据加载的速度"></a>怎么做：如何提高数据加载的速度</h2><p>面对不同的原因，列出不同的解决方法如下。</p>
 <h3 id="数据增强和预处理-1"><a href="#数据增强和预处理-1" class="headerlink" title="数据增强和预处理"></a>数据增强和预处理</h3><ol>
 <li>考虑提高运行效率，包括但不限于使用多进程(线程)处理等</li>
@@ -68,11 +69,15 @@
 <li>升级为高速网络连接，如万兆网络、<a href="https://zh.wikipedia.org/wiki/InfiniBand" target="_blank" rel="noopener">InfiniBand</a></li>
 <li>使用单机训练</li>
 </ol>
+<h3 id="特殊数据类型"><a href="#特殊数据类型" class="headerlink" title="特殊数据类型"></a>特殊数据类型</h3><h4 id="CSV"><a href="#CSV" class="headerlink" title="CSV"></a>CSV</h4><p>推荐使用<a href="www.hdfgroup.org">HDF5格式</a>存储数据。如果csv文件已经使用pandas <code>DataFrame</code>读取，仅需使用<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_hdf.html" target="_blank" rel="noopener"><code>to_hdf</code></a>方法即可将<code>DataFrame</code>保存为HDF5格式的文件.</p>
+<blockquote>
+<p>Note: 更快的Python结构化数据处理<br><br><br>对于使用Python处理大量的数据，请参考:<br><br>[1] <a href="https://stackoverflow.com/questions/14262433/large-data-work-flows-using-pandas" target="_blank" rel="noopener">https://stackoverflow.com/questions/14262433/large-data-work-flows-using-pandas</a><br><br>[2] Python上的高性能计算框架<a href="dask.org">Dask</a><br><br>[3] 高性能类Pandas库<a href="https://github.com/modin-project/modin" target="_blank" rel="noopener">Modin</a><br><br>[4] Python加速框架<a href="numba.pydata.org">Numba</a><br></p>
+</blockquote>
 ]]></content>
       <tags>
         <tag>PyTorch</tag>
-        <tag>As Fast As Possible</tag>
         <tag>TUTORIAL</tag>
+        <tag>As Fast As Possible</tag>
       </tags>
   </entry>
   <entry>
@@ -128,8 +133,8 @@
 ]]></content>
       <tags>
         <tag>PyTorch</tag>
-        <tag>BEST PRACTICE</tag>
         <tag>As Fast As Possible</tag>
+        <tag>BEST PRACTICE</tag>
       </tags>
   </entry>
 </search>
