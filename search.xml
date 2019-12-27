@@ -74,10 +74,13 @@
 <p>Note: 更快的Python结构化数据处理<br><br><br>对于使用Python处理大量的数据，请参考:<br><br>[1] <a href="https://stackoverflow.com/questions/14262433/large-data-work-flows-using-pandas" target="_blank" rel="noopener">https://stackoverflow.com/questions/14262433/large-data-work-flows-using-pandas</a><br><br>[2] Python上的高性能计算框架<a href="dask.org">Dask</a><br><br>[3] 高性能类Pandas库<a href="https://github.com/modin-project/modin" target="_blank" rel="noopener">Modin</a><br><br>[4] Python加速框架<a href="numba.pydata.org">Numba</a><br></p>
 </blockquote>
 ]]></content>
+      <categories>
+        <category>TUTORIAL</category>
+      </categories>
       <tags>
         <tag>PyTorch</tag>
-        <tag>TUTORIAL</tag>
         <tag>As Fast As Possible</tag>
+        <tag>TUTORIAL</tag>
       </tags>
   </entry>
   <entry>
@@ -131,10 +134,13 @@
 
 
 ]]></content>
+      <categories>
+        <category>BEST PRACTICE</category>
+      </categories>
       <tags>
         <tag>PyTorch</tag>
-        <tag>As Fast As Possible</tag>
         <tag>BEST PRACTICE</tag>
+        <tag>As Fast As Possible</tag>
       </tags>
   </entry>
 </search>
