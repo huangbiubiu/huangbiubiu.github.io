@@ -78,7 +78,7 @@
 <blockquote><p><strong>先验分布从哪里来？</strong></p>
 <p>贝叶斯估计要求预先知道参数的先验分布$P(\theta)$，否则无法进行估计。那么我们怎么知道先验分布呢？通常来说，我们根据自己的知识<em>假设</em>一个先验分布（即使他不一定对）。</p>
 <ol>
-<li>抛硬币：$\theta$表示每次抛硬币正面向上的概率。根据经验，$\theta$的分布应当满足：(a) P(\theta)最大值应在P(\theta=0.5)处；(b) $\theta \in [0, 1]$；(c) $\theta$的分布类似于一个钟形分布，在$0.5$处最大，$0$和$1$处最小。根据上述三个条件，我们选择<a href="https://en.wikipedia.org/wiki/Beta_distribution" target="_blank" rel="noopener">Beta分布</a>.</li>
+<li>抛硬币：$\theta$表示每次抛硬币正面向上的概率。根据经验，$\theta$的分布应当满足：(a) $P(\theta)$最大值应在$P(\theta=0.5)$处；(b) $\theta \in [0, 1]$；(c) $\theta$的分布类似于一个钟形分布，在$0.5$处最大，$0$和$1$处最小。根据上述三个条件，我们选择<a href="https://en.wikipedia.org/wiki/Beta_distribution" target="_blank" rel="noopener">Beta分布</a>.</li>
 <li>均值的先验分布：我们希望估计高斯分布$N(\theta,1)$的均值$\theta$，由于高斯分布是常见的分布，我们可以假设$\theta$服从高斯分布$\theta \sim N(M,N)$。</li>
 </ol>
 <p>此外，也可以从数据中估计先验分布，请参考<a href="https://en.wikipedia.org/wiki/Empirical_Bayes_method" target="_blank" rel="noopener">经验贝叶斯</a>.</p>
@@ -254,8 +254,8 @@
       </categories>
       <tags>
         <tag>PyTorch</tag>
-        <tag>As Fast As Possible</tag>
         <tag>BEST PRACTICE</tag>
+        <tag>As Fast As Possible</tag>
       </tags>
   </entry>
 </search>
