@@ -2,30 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://huangbiubiu.com/2019/TUTORIAL-FASTER-DATA-LOADING/</loc>
+    <loc>https://huangbiubiu.com/2020/TUTORIAL-REGULARIZATION-AND-SHRINKAGE/</loc>
     
-    <lastmod>2019-12-28T03:32:07.250Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://huangbiubiu.com/categories/index.html</loc>
-    
-    <lastmod>2019-12-27T12:55:34.153Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://huangbiubiu.com/tags/index.html</loc>
-    
-    <lastmod>2019-12-27T12:55:32.628Z</lastmod>
+    <lastmod>2020-02-12T08:59:05.598Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://huangbiubiu.com/2019/BEST-PRACTICE-PyTorch-TensorDataset/</loc>
     
-    <lastmod>2019-12-27T12:50:01.789Z</lastmod>
+    <lastmod>2019-12-28T13:50:26.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://huangbiubiu.com/2019/TUTORIAL-FASTER-DATA-LOADING/</loc>
+    
+    <lastmod>2019-12-28T03:32:07.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://huangbiubiu.com/categories/index.html</loc>
+    
+    <lastmod>2019-12-27T12:55:34.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://huangbiubiu.com/tags/index.html</loc>
+    
+    <lastmod>2019-12-27T12:55:32.000Z</lastmod>
     
   </url>
   
