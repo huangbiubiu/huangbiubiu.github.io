@@ -136,6 +136,10 @@
 <p>对于命令行用户，有许多软件可以提供可视化的cProfile结果，更加直观地分析代码运行情况，例如<a href="https://jiffyclub.github.io/snakeviz/" target="_blank" rel="noopener">SnakeViz</a>.</p>
 </blockquote>
 
+<blockquote><p><strong>Note</strong>: TensorFlow用户</p>
+<p>在PyTorch中，PyTorch基于Python管理变量，因此Python的profile对PyTorch也同样有效。然而，如果对TensorFlow代码使用Python的profile工具，大概率只能看见<code>session.run()</code>占用了最大的运行时间，而无法看到网络内部op的执行时间。若希望对TensorFlow模型内部运算进行分析，请参考<a href="https://www.tensorflow.org/tensorboard/tensorboard_profiling_keras" target="_blank" rel="noopener">TensorFlow Profiler</a>. 不过，TensorFlow的数据预处理通常也是基于Python完成，若仅仅对数据预处理部分分析，则可以直接使用Python的profile工具。</p>
+</blockquote>
+
 <h3 id="间接观察：nvidia-smi"><a href="#间接观察：nvidia-smi" class="headerlink" title="间接观察：nvidia-smi"></a>间接观察：nvidia-smi</h3><p>我们也可以通过不断观察<code>nvidia-smi</code>的GPU利用率字段来推断GPU是否处于满负荷状态：</p>
 <p><code>watch -n0 nvidia-smi</code></p>
 <p><a href="https://en.wikipedia.org/wiki/Watch_(Unix)" target="_blank" rel="noopener">该命令</a>每0.1s刷新一次<code>nvidia-smi</code>的状态。如果发现<code>Volatile GPU-Util</code>字段不是一直处于100%，有几种可能：</p>
