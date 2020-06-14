@@ -93,8 +93,8 @@
         <category>TUTORIAL</category>
       </categories>
       <tags>
-        <tag>Machine Learning</tag>
         <tag>TUTORIAL</tag>
+        <tag>Machine Learning</tag>
       </tags>
   </entry>
   <entry>
@@ -104,8 +104,8 @@
 <p>教程：如何避免训练速度被数据加载拖累</p>
 <a id="more"></a>
 
-<p>数据加载是神经网络训练的重要步骤。我们会花费大量金钱来购买更加昂贵的GPU，以求获得更快的训练（推理）速度。然而，数据加载的时间花费却获得较少的关注。如何优化数据加载的过程，从而充分利用GPU？</p>
-<p>TL;DR: <a href="#Checklist">Checklist</a></p>
+<p>数据加载是神经网络训练的重要步骤。我们会花费大量金钱来购买更加昂贵的GPU，以求获得更快的训练（推理）速度。然而，数据加载的时间花费却获得较少的关注。如何优化数据加载的过程，从而充分利用GPU?</p>
+<p><strong>TL;DR</strong>: <a href="#Checklist">Checklist</a></p>
 <h2 id="是不是：数据加载的时间是你的瓶颈吗？"><a href="#是不是：数据加载的时间是你的瓶颈吗？" class="headerlink" title="是不是：数据加载的时间是你的瓶颈吗？"></a>是不是：数据加载的时间是你的瓶颈吗？</h2><p>「先问是不是」：解决这个问题之前，我们首先需要知道数据加载的时间是否真的拖慢了训练速度。下面介绍几个方法来查看训练中数据加载花费的时间。</p>
 <h3 id="直接测量-time-time"><a href="#直接测量-time-time" class="headerlink" title="直接测量: time.time()"></a>直接测量: <code>time.time()</code></h3><p>最为直观的方法就是测量数据加载所需要的时间花费。Python中可以使用<code>time.time()</code>来返回当前的时间。在数据加载前后分别测量一次当前时间，相减后即为数据加载时间。PyTorch提供了一个很好的<a href="https://github.com/pytorch/examples/blob/master/imagenet/main.py#L277-L280" target="_blank" rel="noopener">示例</a>：</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># only code snippet</span></span><br><span class="line"><span class="comment"># could not run directly</span></span><br><span class="line"></span><br><span class="line">end = time.time()</span><br><span class="line"><span class="keyword">for</span> i, (images, target) <span class="keyword">in</span> enumerate(train_loader):</span><br><span class="line">    <span class="comment"># measure data loading time</span></span><br><span class="line">    data_time.update(time.time() - end)</span><br></pre></td></tr></table></figure>
@@ -169,12 +169,17 @@
 <li>考虑将数据增强和预处理操作离线进行，即预先处理好数据存在磁盘中，在训练时直接加载处理好的数据。</li>
 </ol>
 <h3 id="IO-1"><a href="#IO-1" class="headerlink" title="IO"></a>IO</h3><h4 id="磁盘IO-1"><a href="#磁盘IO-1" class="headerlink" title="磁盘IO"></a>磁盘IO</h4><ol>
-<li>将数据存储在SSD中通常能解决此问题</li>
-<li>如果内存足够大，考虑将所有数据加载到内存中（通常不太可行）</li>
+<li><p>将数据存储在SSD中通常能解决此问题。</p>
+</li>
+<li><p>如果内存足够大，考虑将所有数据加载到内存中。</p>
+<p> 通常情况下，在内存足够的时候，操作系统会自动将常用的文件缓存到内存中。这样的缓存机制在<em>大多数情况</em>下工作得很好。然而，在对大量数据进行随机读写时，文件系统的缓存可能无法满足我们的要求。此时我们可以人工将数据强制固定在内存中。使用ramfs可以做到这一点，请参考<a href="https://unix.stackexchange.com/questions/66329/creating-a-ram-disk-on-linux。" target="_blank" rel="noopener">https://unix.stackexchange.com/questions/66329/creating-a-ram-disk-on-linux。</a></p>
+</li>
+<li><p>如果你有多块磁盘，考虑使用RAID。效率最高的RAID是使用<a href="https://en.wikipedia.org/wiki/Disk_array_controller" target="_blank" rel="noopener">专门的RAID控制器</a>。最方便的方法是使用<a href="https://en.wikipedia.org/wiki/RAID#Software-based" target="_blank" rel="noopener">软RAID</a>，即通过软件的方式模拟磁盘阵列。主流的操作系统都提供了软RAID的支持，如<a href="https://superuser.com/questions/1001042/software-raid-windows-10" target="_blank" rel="noopener">Windows</a>, <a href="https://www.digitalocean.com/community/tutorials/how-to-create-raid-arrays-with-mdadm-on-ubuntu-16-04" target="_blank" rel="noopener">Ubuntu</a>等。</p>
+</li>
 </ol>
 <h4 id="分布式训练-1"><a href="#分布式训练-1" class="headerlink" title="分布式训练"></a>分布式训练</h4><ol>
-<li>升级为高速网络连接，如万兆网络、<a href="https://zh.wikipedia.org/wiki/InfiniBand" target="_blank" rel="noopener">InfiniBand</a></li>
-<li>使用单机训练</li>
+<li>升级为高速网络连接，如万兆以太网、<a href="https://zh.wikipedia.org/wiki/InfiniBand" target="_blank" rel="noopener">InfiniBand</a>.</li>
+<li>使用单机训练.</li>
 </ol>
 <h3 id="特殊数据类型"><a href="#特殊数据类型" class="headerlink" title="特殊数据类型"></a>特殊数据类型</h3><h4 id="CSV"><a href="#CSV" class="headerlink" title="CSV"></a>CSV</h4><p>推荐使用<a href="www.hdfgroup.org">HDF5格式</a>存储数据。如果csv文件已经使用pandas <code>DataFrame</code>读取，仅需使用<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_hdf.html" target="_blank" rel="noopener"><code>to_hdf</code></a>方法即可将<code>DataFrame</code>保存为HDF5格式的文件.</p>
 <blockquote>
@@ -193,8 +198,8 @@
         <category>TUTORIAL</category>
       </categories>
       <tags>
-        <tag>TUTORIAL</tag>
         <tag>PyTorch</tag>
+        <tag>TUTORIAL</tag>
         <tag>As Fast As Possible</tag>
       </tags>
   </entry>
@@ -254,8 +259,8 @@
       </categories>
       <tags>
         <tag>PyTorch</tag>
-        <tag>BEST PRACTICE</tag>
         <tag>As Fast As Possible</tag>
+        <tag>BEST PRACTICE</tag>
       </tags>
   </entry>
 </search>
