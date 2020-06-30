@@ -1,6 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>编写高质量的bash脚本</title>
+    <url>/2020/TUTORIAL-TIPS-ON-BASH-SCRIPTS/</url>
+    <content><![CDATA[<!-- # [TUTORIAL] Linux bash -->
+
+<p>Linux bash 是提高效率的重要方法。本文介绍几个在编写bash脚本中有用的小技巧，能够有效提升脚本运行的健壮性和可维护性。</p>
+<a id="more"></a>
+
+<h2 id="日志和输出"><a href="#日志和输出" class="headerlink" title="日志和输出"></a>日志和输出</h2><p>日志是debug的重要手段。丰富的日志能够帮助我们快速定位问题所在，从而高效解决问题。</p>
+<h3 id="打印命令"><a href="#打印命令" class="headerlink" title="打印命令"></a>打印命令</h3><p><code>set -x</code>指令能够让脚本向标准输出打印每一个执行的命令，这样一旦出错，可以通过打印的输出，找到错误执行的命令。</p>
+<p>例子：</p>
+<p>执行脚本：</p>
+<figure class="highlight bash"><figcaption><span>print_trace.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> -x</span><br><span class="line"><span class="built_in">echo</span> `expr 10 + 20 `</span><br></pre></td></tr></table></figure>
+
+<p>输出为：</p>
+<figure class="highlight plain"><figcaption><span>print_trace.out</span></figcaption><table><tr><td class="code"><pre><span class="line">+ expr 10 + 20</span><br><span class="line">+ echo 30</span><br><span class="line">30</span><br></pre></td></tr></table></figure>
+
+<p>若想关闭这个功能，只需使用<code>set +x</code>即可：</p>
+<p>执行脚本：</p>
+<figure class="highlight bash"><figcaption><span>disable_trace.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> -x</span><br><span class="line"><span class="built_in">echo</span> `expr 10 + 20 `</span><br><span class="line"><span class="built_in">set</span> +x</span><br><span class="line"><span class="built_in">echo</span> `expr 10 + 20 `</span><br></pre></td></tr></table></figure>
+
+<p>输出为：</p>
+<figure class="highlight plain"><figcaption><span>print_trace.out</span></figcaption><table><tr><td class="code"><pre><span class="line">+ expr 10 + 20</span><br><span class="line">+ echo 30</span><br><span class="line">30</span><br><span class="line">30</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以上两个例子来自<a href="https://stackoverflow.com/a/36277661/5634636。" target="_blank" rel="noopener">https://stackoverflow.com/a/36277661/5634636。</a></p>
+</blockquote>
+<h4 id="重定向set-x的输出"><a href="#重定向set-x的输出" class="headerlink" title="重定向set -x的输出"></a>重定向<code>set -x</code>的输出</h4><p>我们希望将打印出来的命令重定向到日志文件中，以便留存和之后查看。此时可以使用<code>exec</code>命令，重定向脚本的输出：</p>
+<figure class="highlight plain"><figcaption><span>redirect_output.sh bash</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">exec &amp;&gt; &gt;(tee -a &quot;$&#123;terminal_output_dir&#125;&#x2F;terminal.out&quot;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>tee -a</code>的作用是同时输出到文件和标准输出，这样我们可以在terminal看到输出，同时输出也会被保存到文件中。</p>
+<blockquote>
+<p>本方法来自<a href="https://unix.stackexchange.com/a/145654/283657。" target="_blank" rel="noopener">https://unix.stackexchange.com/a/145654/283657。</a></p>
+</blockquote>
+<h3 id="有颜色的输出"><a href="#有颜色的输出" class="headerlink" title="有颜色的输出"></a>有颜色的输出</h3><p>在执行危险操作时，我们希望有更醒目的警示来提示用户。例如在删除文件时，我们希望用红色的字体来提示用户。在执行成功时，我们通常使用绿色的字体。如何打印带颜色的字体？</p>
+<blockquote>
+<p>本方法来自<a href="https://stackoverflow.com/a/20983251/5634636。" target="_blank" rel="noopener">https://stackoverflow.com/a/20983251/5634636。</a></p>
+</blockquote>
+<p>首先预先定义三个变量：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">RED=$(tput setaf 1)</span><br><span class="line">GREEN=$(tput setaf 2)</span><br><span class="line">RESET=$(tput sgr0)</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以自由地在字符串中使用了：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">echo &quot;$&#123;RED&#125;ERROR! SOMETHING WRONG!$&#123;RESET&#125;&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>实践</strong>：在删除危险文件前警示用户：</p>
+<figure class="highlight bash"><figcaption><span>remove_dangerous_files.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># set color</span></span><br><span class="line">RED=$(tput setaf 1)</span><br><span class="line">GREEN=$(tput setaf 2)</span><br><span class="line">RESET=$(tput sgr0)</span><br><span class="line"></span><br><span class="line"><span class="built_in">read</span> -p <span class="string">"Are you sure to remove files?<span class="variable">$&#123;RESET&#125;</span>"</span> -n 1 -r</span><br><span class="line"><span class="built_in">echo</span>    <span class="comment"># move to a new line</span></span><br><span class="line"><span class="keyword">if</span> [[ <span class="variable">$REPLY</span> =~ ^[Yy]$ ]]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="comment"># do dangerous stuff</span></span><br><span class="line">    rm -rf ./output_files</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="更健壮的脚本"><a href="#更健壮的脚本" class="headerlink" title="更健壮的脚本"></a>更健壮的脚本</h2><p>bash有的行为和可能会带来意想不到的结果，甚至带来灾难性的后果。我们可以用一些方法来预先阻止这样令人意外的行为。</p>
+<h3 id="出错即停止"><a href="#出错即停止" class="headerlink" title="出错即停止"></a>出错即停止</h3><p>和大多数程序语言报错即退出不同，在执行bash脚本时，如果某行命令报错，bash会接着执行之后的指令。如果没有考虑到这一点，可能会带来非预期的效果。例如我们有一个简单的删除日志文件的脚本：</p>
+<figure class="highlight bash"><figcaption><span>clear_log.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ./logs</span><br><span class="line">rm -rf *</span><br></pre></td></tr></table></figure>
+
+<p>这段代码中，如果<code>./logs</code>目录因为某种原因不存在，<code>cd ./logs</code>就会报错，然后<strong>继续执行</strong><code>rm -rf *</code>命令，这是十分危险的，有可能将整个路径都删除。</p>
+<p>为了预防这样的错误，我们令脚本在任意一行命令出错后即停止，不再接着执行接下来的命令。只需要加一行<code>set -e</code>即可：</p>
+<figure class="highlight bash"><figcaption><span>save_clear_log.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> ./logs</span><br><span class="line">rm -rf *</span><br></pre></td></tr></table></figure>
+
+<p>在<code>save_clear_log.sh</code>中，如果<code>cd ./logs</code>报错，该程序会退出，删除的命令将不会被执行。</p>
+<h3 id="禁止使用未定义变量"><a href="#禁止使用未定义变量" class="headerlink" title="禁止使用未定义变量"></a>禁止使用未定义变量</h3><p>在Linux中，使用未定义的变量是被允许的，如果一个变量未被定义，则自动替换为空字符串。这在有时候是危险的：</p>
+<figure class="highlight bash"><figcaption><span>clear_log.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;log_path&#125;</span></span><br><span class="line">rm -rf *</span><br></pre></td></tr></table></figure>
+
+<p>此时如果<code>${log_path}</code>变量未定义，就会执行<code>cd</code>，当前目录就会跳转至用户home目录（即等价于<code>cd ~</code>）。这样这个脚本会将用户home目录中所有文件全部删除。</p>
+<p>为了预防这样的错误，我们可以禁止将未定义变量展开为空字符串：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> -u</span><br></pre></td></tr></table></figure>
+
+<p>脚本可以写为</p>
+<figure class="highlight bash"><figcaption><span>clear_log.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> -eu</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;log_path&#125;</span></span><br><span class="line">rm -rf *</span><br></pre></td></tr></table></figure>
+
+<p>此时若<code>${log_path}</code>变量未定义，<code>cd ${log_path}</code>就会报错，同时因为<code>set -e</code>的缘故，整个脚本将会退出，不再执行删除命令。</p>
+<blockquote><p><code>set -eu</code> 等价于</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"><span class="built_in">set</span> -u</span><br></pre></td></tr></table></figure></blockquote>
+
+<h3 id="确保本地git仓库和远端保持一致"><a href="#确保本地git仓库和远端保持一致" class="headerlink" title="确保本地git仓库和远端保持一致"></a>确保本地git仓库和远端保持一致</h3><p>在运行代码时，特别是在本地编写代码在服务器运行的情况，如果在本地修改好，却忘记在服务器端pull下来，就会运行非预期的代码。我们可以在脚本运行时首先检查本地代码是否与远端一致：</p>
+<figure class="highlight bash"><figcaption><span>check_git_status.sh</span></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># check git status</span></span><br><span class="line"><span class="comment"># see https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git</span></span><br><span class="line"><span class="comment"># check if the dir is git repo</span></span><br><span class="line"><span class="comment"># see https://stackoverflow.com/a/38088814/5634636</span></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$(git rev-parse --is-inside-work-tree 2&gt;/dev/null)</span>"</span> == <span class="string">"true"</span> ]; <span class="keyword">then</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">'Checking git status...'</span></span><br><span class="line">  git fetch</span><br><span class="line">  LOCAL=$(git rev-parse @)</span><br><span class="line">  REMOTE=$(git rev-parse <span class="string">"@&#123;u&#125;"</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> [ <span class="variable">$LOCAL</span> = <span class="variable">$REMOTE</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"<span class="variable">$&#123;GREEN&#125;</span>Git is up-to-date<span class="variable">$&#123;RESET&#125;</span>"</span></span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"<span class="variable">$&#123;GREEN&#125;</span>Git is NOT up-to-date! Pull from remote first!<span class="variable">$&#123;RESET&#125;</span>"</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">"Not in git repo."</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="Further-Reading"><a href="#Further-Reading" class="headerlink" title="Further Reading"></a>Further Reading</h2><ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MjM5ODYwMjI2MA==&mid=2649745834&idx=1&sn=a87c1abec3395327436cc812c8579188&chksm=bed37ad189a4f3c727a9133beaed00d98b78c9dbf7def2f1c55615183eb26eda0fc1be61e93d&mpshare=1&scene=1&srcid=&sharer_sharetime=1586259448506&sharer_shareid=15f38622a00e2c24f3fbd2ab83530e29&key=c6bd44209e6ec513afcc83a4d322a02f2414e6631892457d1fd9a9f5df865f618b840897ee3bf5394da73b3539b1ff233aa1ba186777c8e843fb8ae4bf8a8ca1983f711e652d0a3b62ad898b2462d513&ascene=1&uin=Mjg4MTEzNDIzNA%3D%3D&devicetype=Windows+10&version=62080079&lang=en&exportkey=A9u20MEhMFoSLKvdqc1d2N0%3D&pass_ticket=8B73Soawz1nfoUCSywUtATistyycGq8JWg6gYSlq0nYhQ%2B9TVkURAFntyNNUtubm" target="_blank" rel="noopener">编写可靠 bash 脚本的一些技巧</a></li>
+<li><a href="https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html" target="_blank" rel="noopener">The Set Builtin (Bash Reference Manual)</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>TUTORIAL</category>
+      </categories>
+      <tags>
+        <tag>TUTORIAL</tag>
+        <tag>bash</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Regularization and Shrinkage</title>
     <url>/2020/TUTORIAL-REGULARIZATION-AND-SHRINKAGE/</url>
     <content><![CDATA[<p>为什么把参数变小有助于防止过拟合？</p>
